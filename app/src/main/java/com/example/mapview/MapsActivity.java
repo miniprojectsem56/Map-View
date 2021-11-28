@@ -1,9 +1,20 @@
 package com.example.mapview;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
-
+import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,23 +26,119 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.mapview.databinding.ActivityMapsBinding;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private int flg=1;
     private ActivityMapsBinding binding;
-    private static final float INITIAL_ZOOM = 12f;
+    private static final float INITIAL_ZOOM = 15f;
+    private SensorManager sensorManager;
+    private Sensor gyroscopeSensor;
+    private SensorEventListener gyroscopeEventListener;
+    ToneGenerator toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+//    FirebaseAuth auth;
+    BottomSheetDialog sheetDialog;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
+//        FirebaseApp.initializeApp(this);
+//        auth = FirebaseAuth.getInstance();
 
         // Get the SupportMapFragment and request notification when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        sheetDialog = new BottomSheetDialog(MapsActivity.this,R.style.BottomSheetStyle);
+
+        if(gyroscopeSensor == null) {
+            Toast.makeText(this, "device has no gyroscope",Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        gyroscopeEventListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+
+                if(sensorEvent.values[1]>5f) {
+//                    getWindow().getDecorView().setBackgroundColor(Color.BLUE);
+
+                    toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP,200);
+//                    Toast.makeText(getApplicationContext() , "Pothole Detected", Toast.LENGTH_SHORT).show();
+                    if(flg++==1)
+                    {
+
+                        View view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.bottomsheet_dialog, (RelativeLayout)findViewById(R.id.sheet));
+
+                        sheetDialog.setContentView(view);
+                        sheetDialog.show();
+//                        try
+//                        {
+//                            Thread.sleep(3000);
+//                        }
+//                        catch(InterruptedException ex)
+//                        {
+//                            Thread.currentThread().interrupt();
+//                        }
+//                        sheetDialog.hide();
+                    }
+                } else if(sensorEvent.values[1]<-5f){
+//                    getWindow().getDecorView().setBackgroundColor(Color.YELLOW);
+
+                    toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP,200);
+//                    Toast.makeText(getApplicationContext() , "Pothole Detected", Toast.LENGTH_SHORT).show();
+                    if(flg++==1)
+                    {
+
+                        View view = LayoutInflater.from(MapsActivity.this).inflate(R.layout.bottomsheet_dialog, (RelativeLayout)findViewById(R.id.sheet));
+
+                        sheetDialog.setContentView(view);
+                        sheetDialog.show();
+//                        try
+//                        {
+//                            Thread.sleep(3000);
+//                        }
+//                        catch(InterruptedException ex)
+//                        {
+//                            Thread.currentThread().interrupt();
+//                        }
+//                        sheetDialog.hide();
+                    }
+
+
+                }
+                else{
+                    flg=1;
+                }
+//                try
+//                {
+//                    Thread.sleep(1000);
+//                }
+//                catch(InterruptedException ex)
+//                {
+//                    Thread.currentThread().interrupt();
+//                }
+
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+
+            }
+        };
     }
 
     /**
@@ -81,6 +188,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        sensorManager.registerListener(gyroscopeEventListener, gyroscopeSensor, 1000);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        sensorManager.unregisterListener(gyroscopeEventListener);
     }
 
 
