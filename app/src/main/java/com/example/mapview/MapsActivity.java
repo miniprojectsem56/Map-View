@@ -1,7 +1,11 @@
 package com.example.mapview;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import android.graphics.Color;
 import android.hardware.Sensor;
@@ -13,7 +17,9 @@ import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -73,7 +79,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
 
-                if(sensorEvent.values[1]>5f) {
+                if(sensorEvent.values[1]>5f || sensorEvent.values[0]>5f ||sensorEvent.values[2]>5f) {
 //                    getWindow().getDecorView().setBackgroundColor(Color.BLUE);
 
                     toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP,200);
@@ -95,7 +101,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                        }
 //                        sheetDialog.hide();
                     }
-                } else if(sensorEvent.values[1]<-5f){
+                } else if(sensorEvent.values[1]<-5f || sensorEvent.values[0]<-5f ||sensorEvent.values[2]<-5f){
 //                    getWindow().getDecorView().setBackgroundColor(Color.YELLOW);
 
                     toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP,200);
