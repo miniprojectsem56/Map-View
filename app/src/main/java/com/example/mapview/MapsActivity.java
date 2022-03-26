@@ -1,5 +1,6 @@
 package com.example.mapview;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,6 +62,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
 //        FirebaseApp.initializeApp(this);
 //        auth = FirebaseAuth.getInstance();
+        // The callback can be enabled or disabled here or in handleOnBackPressed()
+
 
         // Get the SupportMapFragment and request notification when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
